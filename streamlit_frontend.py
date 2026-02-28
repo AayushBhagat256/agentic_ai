@@ -44,4 +44,4 @@ if user_input:
         'content': ai_response
     })
     with st.chat_message('assistant'):
-        st.text(ai_response)
+        st.markdown(ai_response)
