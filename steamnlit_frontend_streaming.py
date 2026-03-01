@@ -41,15 +41,36 @@ if user_input:
     with st.chat_message('assistant'):
         # st.markdown(ai_response)
         
-        ai_response = st.write_stream(
-            message_chunk.content for message_chunk, metadata in chatbot.stream(
-                {'messages': [HumanMessage(content=user_input)]},
-                config={'configurable': {'thread_id': 'thread_1'}},
-                stream_mode='messages'
-            )
-        )
-        # adding the ai response message to the message history
+        # ai_response = st.write_stream(
+        #     message_chunk.content for message_chunk, metadata in chatbot.stream(
+        #         {'messages': [HumanMessage(content=user_input)]},
+        #         config={'configurable': {'thread_id': 'thread_1'}},
+        #         stream_mode='messages'
+        #     )
+        # )
+        # # adding the ai response message to the message history
+        # st.session_state['message_history'].append({
+        # 'role': 'assistant',
+        # 'content': ai_response
+        # })
+        # Stream chunks into a placeholder as plain text, then swap to markdown
+        placeholder = st.empty()
+        full_response = ""
+
+        for message_chunk, metadata in chatbot.stream(
+            {'messages': [HumanMessage(content=user_input)]},
+            config={'configurable': {'thread_id': 'thread_1'}},
+            stream_mode='messages'
+        ):
+            if message_chunk.content:
+                full_response += message_chunk.content
+                # Show streaming text live (plain), with a blinking cursor
+                placeholder.markdown(full_response + "▌")
+
+        # Once done, replace with clean final markdown (no cursor)
+        placeholder.markdown(full_response)
+
         st.session_state['message_history'].append({
-        'role': 'assistant',
-        'content': ai_response
+            'role': 'assistant',
+            'content': full_response
         })
